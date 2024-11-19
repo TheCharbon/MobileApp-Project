@@ -12,5 +12,5 @@ data class Entry(
     val category: String,
     val description: String,
     val amount: Double,
-    val timestamp: Date
+    val timestamp: String
 )

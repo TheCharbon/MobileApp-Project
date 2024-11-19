@@ -42,7 +42,7 @@ fun HomeView(navController: NavController, modifier: Modifier = Modifier){
     ){
         Row (
             modifier
-                .
+
         ){
             Navbar(navController)
         }
