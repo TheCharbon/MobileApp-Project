@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+    
     namespace = "com.example.mobileapp_project"
     compileSdk = 35
 
