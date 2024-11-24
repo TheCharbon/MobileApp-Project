@@ -16,7 +16,7 @@ fun Navbar(navController: NavController){
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 50.dp),
+            .padding(bottom = 40.dp),
         horizontalArrangement = Arrangement.Center
     ){
         EmailButton()
