@@ -14,4 +14,7 @@ interface EntryDao {
 
     @Query("SELECT * from finances WHERE strftime('%Y-%m', timestamp / 1000, 'unixepoch') = :month")
     fun getItem(month: String): Flow<List<Entry>>
+
+    @Query("SELECT * from finances")
+    fun getAll() : Flow<List<Entry>>
 }
