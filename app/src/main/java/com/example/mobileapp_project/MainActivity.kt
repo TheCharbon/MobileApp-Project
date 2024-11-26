@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,11 +27,13 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -45,6 +48,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,6 +127,8 @@ fun HomeView(navController: NavController){
 @Composable
 fun AnalyticsView(navController: NavController, dao : EntryDao){
     val dateVal = rememberDatePickerState()
+    var income by remember { mutableDoubleStateOf(0.00) }
+    var expenses by remember { mutableDoubleStateOf(0.00) }
 
     var showDialog by remember { mutableStateOf(false) }
     Column(
@@ -133,34 +141,88 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
 
         //title
         TitleLabel(title = "Analytics")
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = { showDialog = true }) {
+                    Text(text = "Pick a Date")
+                }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = { showDialog = true }) {
-                Text(text = "Pick a Date")
-            }
-
-            if (showDialog) {
-                DatePickerDialog(
-                    onDismissRequest = { showDialog = false },
-                    confirmButton = {
-                        TextButton(onClick = { showDialog = false }) {
-                            Text(text = "OK")
+                if (showDialog) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDialog = false },
+                        confirmButton = {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text(text = "OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text(text = "Cancel")
+                            }
                         }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDialog = false }) {
-                            Text(text = "Cancel")
+                    ) {
+                        DatePicker(state = dateVal)
+                    }
+                }
+                Button(onClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        // Ensure date is selected and is greater than 0
+                        if (dateVal.selectedDateMillis != null && dateVal.selectedDateMillis!! > 0) {
+                            // Format the selected date into "yyyy-MM"
+                            val epoch = dateVal.selectedDateMillis
+                            val date = epoch?.let { Date(it) }
+                            val sdf = SimpleDateFormat("yyyy-MM", Locale.getDefault())
+                            val formattedDate = date?.let { sdf.format(it) }
+
+                            // Fetch the items for the selected month
+                            formattedDate?.let { month ->
+                                dao.getItem(month).collect { entries ->
+                                    // Initialize totals for expenses and incomes
+                                    var totalExpenses = 0.0
+                                    var totalIncomes = 0.0
+
+                                    // Loop through the entries to tally expenses and incomes
+                                    for (entry in entries) {
+                                        if (entry.expense) {
+                                            totalExpenses += entry.amount // Add to expenses
+                                        } else {
+                                            totalIncomes += entry.amount // Add to incomes
+                                        }
+                                    }
+                                    income = totalIncomes
+                                    expenses = totalExpenses
+
+                                    // Optionally, you can log or return the results
+                                    println("Total Expenses: $totalExpenses")
+                                    println("Total Incomes: $totalIncomes")
+                                }
+                            }
                         }
                     }
-                ) {
-                    DatePicker(state = dateVal)
                 }
+                ) {
+                    Text(text = "Get Stats (Pick Date First)")
+                }
+
+            }
+
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Income:")
+                Spacer(modifier = Modifier.padding(horizontal = 3.dp))
+                Text(text = income.toString())
+                Spacer(modifier = Modifier.padding(horizontal = 20.dp))
+                Text(text = "Expenses:")
+                Spacer(modifier = Modifier.padding(horizontal = 3.dp))
+                Text(text = expenses.toString())
             }
         }
+        
 
     }
 }
