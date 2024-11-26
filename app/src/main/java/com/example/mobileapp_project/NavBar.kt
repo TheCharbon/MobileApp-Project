@@ -1,5 +1,6 @@
 package com.example.mobileapp_project
 
+import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -9,19 +10,27 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import java.util.concurrent.Flow
+import com.example.mobileapp_project.data.Entry
+import com.example.mobileapp_project.data.EntryDao
+import com.example.mobileapp_project.data.FinanceDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.launch
 
 @Composable
-fun Navbar(navController: NavController){
+fun Navbar(navController: NavController, dao: EntryDao){
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 40.dp),
         horizontalArrangement = Arrangement.Center
     ){
-        EmailButton()
+        EmailButton(dao)
         HomeButton(navController)
         AnalyticsButton(navController)
         EntryButton(navController)
@@ -38,7 +47,7 @@ private fun HomeButton(navController: NavController){
 }
 
 @Composable
-public fun AnalyticsButton(navController: NavController){
+private fun AnalyticsButton(navController: NavController){
     Button(onClick = {
         navController.navigate("analytics")
     }) {
@@ -47,7 +56,7 @@ public fun AnalyticsButton(navController: NavController){
 }
 
 @Composable
-public fun EntryButton(navController: NavController){
+private fun EntryButton(navController: NavController){
     Button(onClick = {
         navController.navigate("entry")
     }) {
@@ -57,28 +66,35 @@ public fun EntryButton(navController: NavController){
 
 
 @Composable
-private fun EmailButton(){
+private fun EmailButton(dao: EntryDao){
+    val context = LocalContext.current
     Button(onClick = {
         val result = StringBuilder()
-        var analytics =
-        //analytics.collect { list ->
-        //    list.forEach { string ->
-        //        result.append(string).append("\n")
-        //    }
-        //}
-        shareContent("")
+        var analytics: Flow<List<Entry>> = emptyFlow()
+        CoroutineScope(Dispatchers.IO).launch{
+            analytics = dao.getAll()
+            analytics.collect { list ->
+                list.forEach { string ->
+                    result.append(string).append("\n")
+                }
+            }
+            shareContent(context, result.toString())
+        }
     }) {
         Text(text = "Email")
     }
 }
 
-fun shareContent(content: String) {
+fun shareContent(context: Context, content: String) {
+
     val intent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain" // Specify type (text, image, etc.)
-        putExtra(Intent.EXTRA_TEXT, content) // Add content
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, content)
     }
-    // Show the Share Sheet
-    val chooser = Intent.createChooser(intent, "Share via")
-    chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Ensure it works from composables
-    //chooser.startActivity()
+    context.startActivity(
+        Intent.createChooser(
+            intent,
+            "Share Via"
+        )
+    )
 }

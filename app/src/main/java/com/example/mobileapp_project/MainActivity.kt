@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
             MobileAppProjectTheme {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "home") {
-                    composable("home") { HomeView(navController) }
+                    composable("home") { HomeView(navController, entryDao) }
                     composable("analytics") { AnalyticsView(navController, entryDao) }
                     composable("entry") { EntryView(navController, entryDao) }
                 }
@@ -74,14 +74,14 @@ class MainActivity : ComponentActivity() {
  * has access to analytics and entry pages
  */
 @Composable
-fun HomeView(navController: NavController){
+fun HomeView(navController: NavController, dao : EntryDao){
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp)
     ){
         //navbar
-        Navbar(navController)
+        Navbar(navController, dao)
 
         //title
         TitleLabel(title = "Welcome to the finance tracker app!")
@@ -129,7 +129,7 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
             .padding(top = 16.dp)
     ){
         //navbar
-        Navbar(navController)
+        Navbar(navController, dao)
 
         //title
         TitleLabel(title = "Analytics")
@@ -188,7 +188,7 @@ fun EntryView(navController: NavController, dao : EntryDao){
             .padding(top = 16.dp)
     ){
         //navbar
-        Navbar(navController)
+        Navbar(navController, dao)
 
         //title
         TitleLabel(title = "New Record")
