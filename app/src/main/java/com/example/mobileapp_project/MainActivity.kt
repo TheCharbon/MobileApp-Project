@@ -41,12 +41,18 @@ import com.example.mobileapp_project.data.Entry
 import com.example.mobileapp_project.data.EntryDao
 import com.example.mobileapp_project.data.FinanceDatabase
 import com.example.mobileapp_project.ui.theme.MobileAppProjectTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val db = FinanceDatabase.getDatabase(this.applicationContext)
         val entryDao = db.entryDao()
+        suspend {
+
+        }
         super.onCreate(savedInstanceState)
         setContent {
             MobileAppProjectTheme {
@@ -268,23 +274,13 @@ fun EntryView(navController: NavController, dao : EntryDao){
                         it
                     )
                 }
-                suspend {
+                CoroutineScope(Dispatchers.IO).launch{
                     if (input != null) {
                         dao.insert(input)
                     }
                 }
-                suspend {
-                    // Collect the flow and access the first element in the list
-                    val dbContents = dao.getAll().firstOrNull()  // Collects the first emitted list
-                    dbContents?.let {
-                        if (it.isNotEmpty()) {
-                            val firstElement = it[0]  // Access the first element
-                            Log.d("DB", "First element: $firstElement")
-                        } else {
-                            Log.d("DB", "The list is empty.")
-                        }
-                    } ?: Log.d("DB", "No data received.")
-                }
+
+
 
             }) {
                 Text(text = "Save")
