@@ -1,6 +1,7 @@
 package com.example.mobileapp_project
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -36,18 +37,24 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.mobileapp_project.data.Entry
+import com.example.mobileapp_project.data.EntryDao
+import com.example.mobileapp_project.data.FinanceDatabase
 import com.example.mobileapp_project.ui.theme.MobileAppProjectTheme
+import kotlinx.coroutines.flow.firstOrNull
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val db = FinanceDatabase.getDatabase(this.applicationContext)
+        val entryDao = db.entryDao()
         super.onCreate(savedInstanceState)
         setContent {
             MobileAppProjectTheme {
                 val navController = rememberNavController()
                 NavHost(navController = navController, startDestination = "home") {
                     composable("home") { HomeView(navController) }
-                    composable("analytics") { AnalyticsView(navController) }
-                    composable("entry") { EntryView(navController) }
+                    composable("analytics") { AnalyticsView(navController, entryDao) }
+                    composable("entry") { EntryView(navController, entryDao) }
                 }
             }
         }
@@ -104,8 +111,12 @@ fun HomeView(navController: NavController){
  * Shows the analytics gotten from
  * the database and processes it into a graph
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnalyticsView(navController: NavController){
+fun AnalyticsView(navController: NavController, dao : EntryDao){
+    val dateVal = rememberDatePickerState()
+
+    var showDialog by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -117,7 +128,34 @@ fun AnalyticsView(navController: NavController){
         //title
         TitleLabel(title = "Analytics")
 
-        //graph, etc...
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = { showDialog = true }) {
+                Text(text = "Pick a Date")
+            }
+
+            if (showDialog) {
+                DatePickerDialog(
+                    onDismissRequest = { showDialog = false },
+                    confirmButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text(text = "OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text(text = "Cancel")
+                        }
+                    }
+                ) {
+                    DatePicker(state = dateVal)
+                }
+            }
+        }
+
     }
 }
 
@@ -129,7 +167,7 @@ fun AnalyticsView(navController: NavController){
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EntryView(navController: NavController){
+fun EntryView(navController: NavController, dao : EntryDao){
     var inputDescription by remember { mutableStateOf("") }
     var inputAmount by remember { mutableStateOf("") }
     var inputCategory by remember { mutableStateOf("") }
@@ -224,6 +262,29 @@ fun EntryView(navController: NavController){
             horizontalArrangement = Arrangement.Center
         ){
             Button(onClick = {
+                Log.d("test", "EntryView: clicked")
+                val input = dateVal.selectedDateMillis?.let {
+                    Entry(0,isIncome,inputCategory,inputDescription,inputAmount.toDouble(),
+                        it
+                    )
+                }
+                suspend {
+                    if (input != null) {
+                        dao.insert(input)
+                    }
+                }
+                suspend {
+                    // Collect the flow and access the first element in the list
+                    val dbContents = dao.getAll().firstOrNull()  // Collects the first emitted list
+                    dbContents?.let {
+                        if (it.isNotEmpty()) {
+                            val firstElement = it[0]  // Access the first element
+                            Log.d("DB", "First element: $firstElement")
+                        } else {
+                            Log.d("DB", "The list is empty.")
+                        }
+                    } ?: Log.d("DB", "No data received.")
+                }
 
             }) {
                 Text(text = "Save")
