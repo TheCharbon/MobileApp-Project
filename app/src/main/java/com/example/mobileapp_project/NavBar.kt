@@ -1,5 +1,6 @@
 package com.example.mobileapp_project
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.util.concurrent.Flow
 
 @Composable
 fun Navbar(navController: NavController){
@@ -23,15 +25,6 @@ fun Navbar(navController: NavController){
         HomeButton(navController)
         AnalyticsButton(navController)
         EntryButton(navController)
-    }
-}
-
-@Composable
-private fun EmailButton(){
-    Button(onClick = {
-
-    }) {
-        Text(text = "Email")
     }
 }
 
@@ -60,4 +53,32 @@ public fun EntryButton(navController: NavController){
     }) {
         Text(text = "Entry")
     }
+}
+
+
+@Composable
+private fun EmailButton(){
+    Button(onClick = {
+        val result = StringBuilder()
+        var analytics =
+        //analytics.collect { list ->
+        //    list.forEach { string ->
+        //        result.append(string).append("\n")
+        //    }
+        //}
+        shareContent("")
+    }) {
+        Text(text = "Email")
+    }
+}
+
+fun shareContent(content: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain" // Specify type (text, image, etc.)
+        putExtra(Intent.EXTRA_TEXT, content) // Add content
+    }
+    // Show the Share Sheet
+    val chooser = Intent.createChooser(intent, "Share via")
+    chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Ensure it works from composables
+    //chooser.startActivity()
 }
