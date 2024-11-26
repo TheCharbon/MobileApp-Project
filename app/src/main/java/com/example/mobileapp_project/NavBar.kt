@@ -1,16 +1,29 @@
 package com.example.mobileapp_project
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
 fun Navbar(navController: NavController){
-    EmailButton()
-    HomeButton(navController)
-    AnalyticsButton(navController)
-    EntryButton(navController)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 40.dp),
+        horizontalArrangement = Arrangement.Center
+    ){
+        EmailButton()
+        HomeButton(navController)
+        AnalyticsButton(navController)
+        EntryButton(navController)
+    }
 }
 
 @Composable
@@ -32,7 +45,7 @@ private fun HomeButton(navController: NavController){
 }
 
 @Composable
-private fun AnalyticsButton(navController: NavController){
+public fun AnalyticsButton(navController: NavController){
     Button(onClick = {
         navController.navigate("analytics")
     }) {
@@ -41,7 +54,7 @@ private fun AnalyticsButton(navController: NavController){
 }
 
 @Composable
-private fun EntryButton(navController: NavController){
+public fun EntryButton(navController: NavController){
     Button(onClick = {
         navController.navigate("entry")
     }) {
