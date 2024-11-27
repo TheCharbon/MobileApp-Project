@@ -63,14 +63,17 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose.v275)
-//Room
+    //Room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.junit.ktx)
     ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
     implementation(libs.androidx.room.ktx)
 
     // Testing
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation(libs.androidx.core)
     androidTestImplementation(libs.androidx.espresso.core.v351)
-    androidTestImplementation(libs.androidx.junit.v115)
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

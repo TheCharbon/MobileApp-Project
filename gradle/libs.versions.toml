@@ -3,6 +3,7 @@ activityComposeVersion = "1.8.1"
 agp = "8.5.2"
 androidxJunit = "1.1.5"
 composeBomVersion = "2023.10.01"
+core = "1.6.1"
 espressoCoreVersion = "3.5.1"
 kotlin = "1.9.0"
 coreKtx = "1.15.0"
@@ -18,11 +19,13 @@ navigationComposeVersion = "2.7.5"
 navigationRuntimeKtx = "2.8.4"
 navigationCompose = "2.8.4"
 roomKtx = "2.6.0"
+junitKtx = "1.2.1"
 
 [libraries]
 androidx-activity-compose-v181 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-compose-bom-v20231001 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
 androidx-compose-material3-material3 = { module = "androidx.compose.material3:material3" }
+androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
@@ -50,6 +53,7 @@ material3 = { module = "androidx.compose.material3:material3", version.ref = "ma
 ui = { module = "androidx.compose.ui:ui" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
