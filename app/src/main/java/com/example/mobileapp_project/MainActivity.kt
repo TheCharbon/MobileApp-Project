@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -28,10 +30,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +61,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import androidx.compose.ui.graphics.Color
+import com.example.mobileapp_project.data.CategoryExpense
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,6 +140,7 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
     val dateVal = rememberDatePickerState()
     var income by remember { mutableDoubleStateOf(0.00) }
     var expenses by remember { mutableDoubleStateOf(0.00) }
+
 
     var showDialog by remember { mutableStateOf(false) }
     Column(
@@ -227,6 +234,15 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
                 Text(text = expenses.toString())
             }
             PieChart(income = income, expenses = expenses)
+            // Collect entries from the database flow
+            val entries by dao.getExpensesGroupedByCategory().collectAsState(initial = emptyList())
+
+            // Display the entries in a LazyColumn
+            LazyColumn {
+                items(entries) { entry ->
+                    EntryCard(entry)
+                }
+            }
         }
         
 
@@ -433,4 +449,15 @@ fun PieChart(income: Double, expenses: Double) {
         )
     }
 }
+@Composable
+fun EntryCard(entry: CategoryExpense) {
+    // Custom UI for each entry
+    Text(
+        text = "Category: ${entry.category}, Value: ${entry.totalExpenses}",
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    )
+}
+
 
