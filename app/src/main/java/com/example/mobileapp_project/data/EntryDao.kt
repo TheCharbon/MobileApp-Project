@@ -17,4 +17,7 @@ interface EntryDao {
 
     @Query("SELECT * from finances")
     fun getAll() : Flow<List<Entry>>
+
+    @Query("SELECT category, SUM(amount) AS totalExpenses FROM finances WHERE expense = 1 GROUP BY category")
+    fun getExpensesGroupedByCategory(): Flow<List<CategoryExpense>>
 }

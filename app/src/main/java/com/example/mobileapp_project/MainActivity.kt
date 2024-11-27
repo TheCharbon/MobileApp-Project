@@ -1,7 +1,5 @@
 package com.example.mobileapp_project
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
@@ -30,17 +30,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -53,13 +55,13 @@ import com.example.mobileapp_project.data.FinanceDatabase
 import com.example.mobileapp_project.ui.theme.MobileAppProjectTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.Color
+import com.example.mobileapp_project.data.CategoryExpense
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -150,33 +152,34 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
 
         //title
         TitleLabel(title = "Analytics")
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = { showDialog = true }) {
-                Text(text = "Pick a Date")
-            }
-
-            if (showDialog) {
-                DatePickerDialog(
-                    onDismissRequest = { showDialog = false },
-                    confirmButton = {
-                        TextButton(onClick = { showDialog = false }) {
-                            Text(text = "OK")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDialog = false }) {
-                            Text(text = "Cancel")
-						}
-                    }
-                ) {
-                    DatePicker(state = dateVal)
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = { showDialog = true }) {
+                    Text(text = "Pick a Date")
                 }
-				Button(onClick = {
+
+                if (showDialog) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDialog = false },
+                        confirmButton = {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text(text = "OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text(text = "Cancel")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = dateVal)
+                    }
+                }
+                Button(onClick = {
                     CoroutineScope(Dispatchers.IO).launch {
                         // Ensure date is selected and is greater than 0
                         if (dateVal.selectedDateMillis != null && dateVal.selectedDateMillis!! > 0) {
@@ -215,22 +218,33 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
                 ) {
                     Text(text = "Get Stats (Pick Date First)")
                 }
-                        
-			    Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Income:")
-                    Spacer(modifier = Modifier.padding(horizontal = 3.dp))
-                    Text(text = income.toString())
-                    Spacer(modifier = Modifier.padding(horizontal = 20.dp))
-                    Text(text = "Expenses:")
-                    Spacer(modifier = Modifier.padding(horizontal = 3.dp))
-                    Text(text = expenses.toString())
-                }
-                PieChart(income = income, expenses = expenses)
+
             }
-        
+
+            Row(modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Income:")
+                Spacer(modifier = Modifier.padding(horizontal = 3.dp))
+                Text(text = income.toString())
+                Spacer(modifier = Modifier.padding(horizontal = 20.dp))
+                Text(text = "Expenses:")
+                Spacer(modifier = Modifier.padding(horizontal = 3.dp))
+                Text(text = expenses.toString())
+            }
+            PieChart(income = income, expenses = expenses)
+            // Collect entries from the database flow
+            val entries by dao.getExpensesGroupedByCategory().collectAsState(initial = emptyList())
+
+            // Display the entries in a LazyColumn
+            LazyColumn {
+                items(entries) { entry ->
+                    EntryCard(entry)
+                }
+            }
         }
+        
+
     }
 }
 
@@ -402,6 +416,7 @@ fun CustomTextField(labelStr: String, placeHolder: String, value: String, onValu
         )
     }
 }
+
 @Composable
 fun PieChart(income: Double, expenses: Double) {
     val total = income + expenses
@@ -433,3 +448,15 @@ fun PieChart(income: Double, expenses: Double) {
         )
     }
 }
+@Composable
+fun EntryCard(entry: CategoryExpense) {
+    // Custom UI for each entry
+    Text(
+        text = "Category: ${entry.category}, Value: ${entry.totalExpenses}",
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+    )
+}
+
+
