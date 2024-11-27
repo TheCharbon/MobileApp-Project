@@ -1,5 +1,7 @@
 package com.example.mobileapp_project
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Dp
@@ -49,6 +52,8 @@ import com.example.mobileapp_project.data.EntryDao
 import com.example.mobileapp_project.data.FinanceDatabase
 import com.example.mobileapp_project.ui.theme.MobileAppProjectTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -208,11 +213,9 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
                             }
                         }
                     }
-                }
                 ) {
                     Text(text = "Get Stats (Pick Date First)")
                 }
-
             }
 
             Row(modifier = Modifier.fillMaxWidth(),
@@ -228,7 +231,6 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
             }
             PieChart(income = income, expenses = expenses)
         }
-        
 
     }
 }

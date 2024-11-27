@@ -15,12 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.mobileapp_project.data.Entry
 import com.example.mobileapp_project.data.EntryDao
-import com.example.mobileapp_project.data.FinanceDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 @Composable
 fun Navbar(navController: NavController, dao: EntryDao){
@@ -30,7 +30,7 @@ fun Navbar(navController: NavController, dao: EntryDao){
             .padding(bottom = 40.dp),
         horizontalArrangement = Arrangement.Center
     ){
-        EmailButton(dao)
+        EmailButton(navController, dao)
         HomeButton(navController)
         AnalyticsButton(navController)
         EntryButton(navController)
@@ -66,7 +66,7 @@ private fun EntryButton(navController: NavController){
 
 
 @Composable
-private fun EmailButton(dao: EntryDao){
+private fun EmailButton(navController: NavController, dao: EntryDao){
     val context = LocalContext.current
     Button(onClick = {
         val result = StringBuilder()
@@ -78,18 +78,18 @@ private fun EmailButton(dao: EntryDao){
                     result.append(string).append("\n")
                 }
             }
-            shareContent(context, result.toString())
         }
+        shareContent(context, result.toString())
     }) {
         Text(text = "Email")
     }
 }
 
-fun shareContent(context: Context, content: String) {
-
+private fun shareContent(context: Context, content: String) {
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_SUBJECT, content)
+        putExtra(Intent.EXTRA_TEXT, content)
     }
     context.startActivity(
         Intent.createChooser(
