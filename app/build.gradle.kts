@@ -52,8 +52,8 @@ android {
 }
 
 dependencies {
+    // Core dependencies
     implementation(libs.material3)
-    // Import the Compose BOM
     implementation(platform(libs.androidx.compose.bom.v20231001))
     implementation(libs.androidx.activity.compose.v181)
     implementation(libs.androidx.compose.material3.material3)
@@ -63,18 +63,30 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose.v275)
-    //Room
+
+    // Room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.junit.junit)
     implementation(libs.androidx.junit.ktx)
     ksp("androidx.room:room-compiler:${rootProject.extra["room_version"]}")
-    implementation(libs.androidx.room.ktx)
+
+    // Core KTX
+    implementation(libs.androidx.core.ktx)
 
     // Testing
-    androidTestImplementation("androidx.test:runner:1.6.2")
-    androidTestImplementation(libs.androidx.core)
-    androidTestImplementation(libs.androidx.espresso.core.v351)
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    implementation(libs.androidx.core.ktx)
+    testImplementation(libs.junit)
+    androidTestImplementation("androidx.test.ext:junit:1.1.5") // Use the correct JUnit version
+    androidTestImplementation("androidx.test:runner:1.6.2") // AndroidJUnitRunner
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Compose testing
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Lifecycle/runtime dependencies
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -84,11 +96,5 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+
 }

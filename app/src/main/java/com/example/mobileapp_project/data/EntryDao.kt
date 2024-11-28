@@ -9,7 +9,7 @@ import java.util.Date
 
 @Dao
 interface EntryDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entry: Entry)
 
     @Query("SELECT * from finances WHERE strftime('%Y-%m', timestamp / 1000, 'unixepoch') = :month")
