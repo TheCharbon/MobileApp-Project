@@ -168,37 +168,35 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
                         DatePicker(state = dateVal)
                     }
                 }
+                //Button to generate the graph
                 Button(onClick = {
+                    //lanch a coroutine for dao operations
                     CoroutineScope(Dispatchers.IO).launch {
-                        // Ensure date is selected and is greater than 0
+                        //null check
                         if (dateVal.selectedDateMillis != null && dateVal.selectedDateMillis!! > 0) {
-                            // Format the selected date into "yyyy-MM"
+
+                            //Format selected date
                             val epoch = dateVal.selectedDateMillis
                             val date = epoch?.let { Date(it) }
                             val sdf = SimpleDateFormat("yyyy-MM", Locale.getDefault())
                             val formattedDate = date?.let { sdf.format(it) }
 
-                            // Fetch the items for the selected month
+                            //Query dao and sum expenses and incomes
                             formattedDate?.let { month ->
                                 dao.getItem(month).collect { entries ->
-                                    // Initialize totals for expenses and incomes
                                     var totalExpenses = 0.0
                                     var totalIncomes = 0.0
 
-                                    // Loop through the entries to tally expenses and incomes
                                     for (entry in entries) {
                                         if (entry.expense) {
-                                            totalExpenses += entry.amount // Add to expenses
+                                            totalExpenses += entry.amount
                                         } else {
-                                            totalIncomes += entry.amount // Add to incomes
+                                            totalIncomes += entry.amount
                                         }
                                     }
+                                    // set state
                                     income = totalIncomes
                                     expenses = totalExpenses
-
-                                    // Optionally, you can log or return the results
-                                    println("Total Expenses: $totalExpenses")
-                                    println("Total Incomes: $totalIncomes")
                                 }
                             }
                         }
@@ -210,6 +208,7 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
 
             }
 
+            // display incomes and expenses
             Row(modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically) {
@@ -222,10 +221,11 @@ fun AnalyticsView(navController: NavController, dao : EntryDao){
                 Text(text = expenses.toString())
             }
             PieChart(income = income, expenses = expenses)
-            // Collect entries from the database flow
+
             val entries by dao.getExpensesGroupedByCategory().collectAsState(initial = emptyList())
 
-            // Display the entries in a LazyColumn
+
+            // expense table
             LazyColumn {
                 items(entries) { entry ->
                     EntryCard(entry)
@@ -302,7 +302,7 @@ fun EntryView(navController: NavController, dao : EntryDao){
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ){
-            Text(text = "Earned")
+            Text(text = "Expense")
 
             Checkbox(
                 checked = isIncome,
@@ -405,9 +405,13 @@ fun CustomTextField(labelStr: String, placeHolder: String, value: String, onValu
         )
     }
 }
+/*
+*Expense income pie chart
+ */
 
 @Composable
 fun PieChart(income: Double, expenses: Double) {
+    //get arc angles
     val total = income + expenses
     val incomeAngle = if (total > 0) (income / total) * 360 else 0f
     val expensesAngle = if (total > 0) (expenses / total) * 360 else 0f
@@ -437,9 +441,11 @@ fun PieChart(income: Double, expenses: Double) {
         )
     }
 }
+/*
+*For use in expense table
+ */
 @Composable
 fun EntryCard(entry: CategoryExpense) {
-    // Custom UI for each entry
     Text(
         text = "Category: ${entry.category}, Value: ${entry.totalExpenses}",
         modifier = Modifier
